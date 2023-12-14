@@ -16,12 +16,11 @@ jobs:
       - name: Build app
         uses: actions/setup-node@v4
         with:
-          node-version: 19
+          node-version: 20
           cache: 'npm'
       - run: npm ci
       - run: npm run build
       - run: npm run test
-#      - run: npm test
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest

@@ -21,9 +21,12 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test
+
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
+    needs:
+      - build
     steps:
       - uses: actions/checkout@v3
         with:

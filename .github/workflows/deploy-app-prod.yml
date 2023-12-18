@@ -1,18 +1,21 @@
-name: Deploy_app_prod
+name: Pipeline_deploy_front_prod
 
 on:
   workflow_dispatch:
     inputs:
       number_version_project:
-        description: 'Project number '
+        description: 'Project number'
         required: true
 
 jobs:
   create_release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    # https://github.com/actions/checkout
+      - name: Init Checkout
+        uses: actions/checkout@v4
+
+    # https://github.com/actions/create-release
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -22,7 +25,7 @@ jobs:
           tag_name: v.${{ inputs.number_version_project }}
           release_name: Release v.${{ inputs.number_version_project }}
           body: |
-            Test body
+            Test
           draft: false
           prerelease: false
 
@@ -31,16 +34,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+    # https://github.com/actions/checkout
+      - uses: actions/checkout@v4
+
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag devops-esgi-front:$(date +%s)
 
+    # https://github.com/docker/login-action
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_LOGIN }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
+    # https://github.com/docker/build-push-action
       - name: Push Docker image with release version
         uses: docker/build-push-action@v5
         with:

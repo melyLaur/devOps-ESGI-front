@@ -1,4 +1,4 @@
-name: Pipeline_deploy_front_prod
+name: Pipeline_deploy_front_on_docker_hub
 
 on:
   workflow_dispatch:

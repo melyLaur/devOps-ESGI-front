@@ -2,14 +2,16 @@ name: Pipeline_deploy_front_prod_2
 
 on:
   workflow_dispatch:
-    inputs:
-      number_version_project:
-        description: 'Project number'
-        required: false
 
 jobs:
   deploy_kube:
     runs-on: ubuntu-latest
+
+    env:
+      KUBE_NAMESPACE: "4al2-the-avengers"
+      KUBE_CONFIG_FILENAME: "kubeconfig.yaml"
+      KUBE_FILE_DEPLOYMENT: "./kube/front-devops-deployment.yaml"
+
     steps:
     # https://github.com/actions/checkout
       - name: Init Checkout
@@ -26,14 +28,14 @@ jobs:
         run : kubectl version --client
 
       - name: Configure kubectl configuration
-        run : echo "${{ secrets.KUBE_CONFIG }}" > kubeconfig.yaml
+        run : echo "${{ secrets.KUBE_CONFIG }}" > ${{ env.KUBE_CONFIG_FILENAME }}
 
-      - name: Deploy
-        run : kubectl apply -f ./kube/front-devops-deployment.yaml --kubeconfig=kubeconfig.yaml -n 4al2-the-avengers
+      - name: Deploy app
+        run : kubectl apply -f ${{ env.KUBE_FILE_DEPLOYMENT }} --kubeconfig=${{ env.KUBE_CONFIG_FILENAME }} -n ${{ env.KUBE_NAMESPACE }}
 
       - name: If error, delete resources
         if: ${{ failure() }}
-        run: kubectl delete -f ./kube/front-devops-deployment.yaml --kubeconfig=kubeconfig.yaml -n 4al2-the-avengers
+        run: kubectl delete -f ${{ env.KUBE_FILE_DEPLOYMENT }} --kubeconfig=${{ env.KUBE_CONFIG_FILENAME }} -n ${{ env.KUBE_NAMESPACE }}
 
       - name: Verify Deployment Status
-        run: kubectl get pods --kubeconfig=kubeconfig.yaml -n 4al2-the-avengers  
+        run: kubectl get pods --kubeconfig=${{ env.KUBE_CONFIG_FILENAME }} -n ${{ env.KUBE_NAMESPACE }}

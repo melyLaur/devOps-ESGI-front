@@ -1,4 +1,4 @@
-name: Pipeline_deploy_back_python_prod_2
+name: Pipeline_deploy_front_prod_2
 
 on:
   workflow_dispatch:
@@ -36,6 +36,4 @@ jobs:
         run: kubectl delete -f ./kube/front-devops-deployment.yaml --kubeconfig=kubeconfig.yaml -n 4al2-the-avengers
 
       - name: Verify Deployment Status
-        run: kubectl get pods -n 4al2-the-avengers  
-
-
+        run: kubectl get pods --kubeconfig=kubeconfig.yaml -n 4al2-the-avengers  

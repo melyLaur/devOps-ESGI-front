@@ -1,4 +1,4 @@
-name: Pipeline_deploy_front_prod_2
+name: Pipeline_deploy_front_on_kube
 
 on:
   workflow_dispatch:

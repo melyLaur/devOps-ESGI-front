@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: front-service
+  labels:
+    app: front
+spec:
+  ports:
+    - port: 3000
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app: front
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-deployment
+  labels:
+    app: front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      containers:
+        - name: front
+          image: melissaesgi/devops-front-esgi:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: API_URL
+              value: "https://backend.4al2.avengers.jbienvenu.fr"
+---
+
+
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  namespace: 4al2-the-avengers
+  labels:
+    app.kubernetes.io/component: controller
+  # Mettre un nom unique pour la classe ingress
+  name: nginx-avengers-front
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: k8s.io/ingress-nginx
+
+---
+
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: 4al2-the-avengers
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging-cluster-issuer
+spec:
+  # Récupérer le nom de la classe ingress ici
+  ingressClassName: nginx-avengers-front
+  tls:
+    - hosts:
+        - frontend.4al2.avengers.jbienvenu.fr
+      secretName: frontend-deploy-tls
+  rules:
+    - host: frontend.4al2.avengers.jbienvenu.fr
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: front-service
+                port:
+                  number: 3000
